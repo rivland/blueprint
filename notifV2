@@ -20,18 +20,17 @@ blueprint:
         text: {}
     service_notification:
       name: "Service de notification"
-      description: "Sélectionnez le service de notification à utiliser (ex: notify.mobile_app_mon_telephone)."
+      description: "Entrez le service de notification à utiliser (ex: notify.mobile_app_mon_telephone)"
       selector:
-        service:
-          domain: notify
-      default: notify.notify
+        text: {}
+      default: "notify.notify"
 
 trigger:
-  platform: state
-  entity_id: !input entite_declencheur
+  - platform: state
+    entity_id: !input entite_declencheur
 
 action:
-  service: !input service_notification
-  data:
-    message: !input message
-    title: !input titre
+  - service: !input service_notification
+    data:
+      message: !input message
+      title: !input titre
