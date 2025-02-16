@@ -1,0 +1,37 @@
+blueprint:
+  name: "Notification basique"
+  description: "Envoie une notification basée sur une entité."
+  domain: automation
+  input:
+    entite_declencheur:
+      name: "Entité de déclenchement"
+      description: "L'entité qui déclenche la notification."
+      selector:
+        entity: {}
+    message:
+      name: "Message de notification"
+      description: "Le message à envoyer dans la notification."
+      selector:
+        text: {}
+    titre:
+      name: "Titre de la notification"
+      description: "Le titre de la notification."
+      selector:
+        text: {}
+    service_notification:
+      name: "Service de notification"
+      description: "Sélectionnez le service de notification à utiliser (ex: notify.mobile_app_mon_telephone)."
+      selector:
+        service:
+          domain: notify
+      default: notify.notify
+
+trigger:
+  platform: state
+  entity_id: !input entite_declencheur
+
+action:
+  service: !input service_notification
+  data:
+    message: !input message
+    title: !input titre
