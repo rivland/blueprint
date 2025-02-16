@@ -1,37 +1,37 @@
 blueprint:
   name: Notification de présence avec boutons interactifs
-  description: Crée une notification interactive pour la présence à la maison, avec suppression automatique et boutons pour plus d'interaction.
+  description: "Crée une notification interactive pour la présence à la maison, avec suppression automatique et boutons pour plus d'interaction."
   domain: automation
   input:
     mode_de_clenchement:
-      name: Mode de déclenchement
-      description: Choisissez comment la présence est détectée : par une personne ou par la proximité.
+      name: "Mode de déclenchement"
+      description: "Choisissez comment la présence est détectée : par une personne ou par la proximité."
       selector:
         select:
           options:
-            - Personne
-            - Proximité
-      default: 'Personne'
+            - "Personne"
+            - "Proximité"
+      default: "Personne"
 
     personne_suivie:
-      name: Personne à suivre
-      description: Sélectionnez la personne à suivre si vous avez choisi "Personne" comme mode de déclenchement.
+      name: "Personne à suivre"
+      description: "Sélectionnez la personne à suivre si vous avez choisi 'Personne' comme mode de déclenchement."
       selector:
         entity:
           domain: person
       required: "{{ mode_de_clenchement == 'Personne' }}"
 
     capteur_proximite:
-      name: Capteur de proximité
-      description: Choisissez le capteur à utiliser si vous avez sélectionné "Proximité" pour détecter la présence.
+      name: "Capteur de proximité"
+      description: "Choisissez le capteur à utiliser si vous avez sélectionné 'Proximité' pour détecter la présence."
       selector:
         entity:
           domain: sensor
       required: "{{ mode_de_clenchement == 'Proximité' }}"
 
     distance_maximale:
-      name: Distance maximale de détection
-      description: La distance en mètres à partir de laquelle la présence de la personne est détectée.
+      name: "Distance maximale de détection"
+      description: "La distance en mètres à partir de laquelle la présence de la personne est détectée."
       selector:
         number:
           min: 0
@@ -41,40 +41,40 @@ blueprint:
       required: "{{ mode_de_clenchement == 'Proximité' }}"
 
     nom_bouton_1:
-      name: Nom du premier bouton
-      description: Le texte qui sera affiché sur le premier bouton de la notification.
+      name: "Nom du premier bouton"
+      description: "Le texte qui sera affiché sur le premier bouton de la notification."
       default: "OK"
       
     nom_bouton_2:
-      name: Nom du second bouton
-      description: Le texte qui sera affiché sur le second bouton de la notification.
+      name: "Nom du second bouton"
+      description: "Le texte qui sera affiché sur le second bouton de la notification."
       default: "Annuler"
 
     action_bouton_1:
-      name: Action du premier bouton
-      description: L'action qui sera exécutée lorsque le premier bouton sera pressé.
+      name: "Action du premier bouton"
+      description: "L'action qui sera exécutée lorsque le premier bouton sera pressé."
       selector:
         action: {}
       
     action_bouton_2:
-      name: Action du second bouton
-      description: L'action qui sera exécutée lorsque le second bouton sera pressé.
+      name: "Action du second bouton"
+      description: "L'action qui sera exécutée lorsque le second bouton sera pressé."
       selector:
         action: {}
 
     condition_suppression:
-      name: Condition de suppression
-      description: La condition qui détermine quand la notification sera supprimée. Exemple : la distance de la personne ou une autre condition.
+      name: "Condition de suppression"
+      description: "La condition qui détermine quand la notification sera supprimée. Exemple : la distance de la personne ou une autre condition."
       selector:
         select:
           options:
-            - Distance
-            - Personne
-      default: 'Distance'
+            - "Distance"
+            - "Personne"
+      default: "Distance"
 
     seuil_suppression:
-      name: Seuil de suppression
-      description: La valeur de seuil à atteindre pour que la notification soit supprimée. Par exemple, "5" pour une distance ou une valeur de capteur.
+      name: "Seuil de suppression"
+      description: "La valeur de seuil à atteindre pour que la notification soit supprimée. Par exemple, '5' pour une distance ou une valeur de capteur."
       selector:
         number:
           min: 0
