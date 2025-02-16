@@ -1,13 +1,8 @@
 blueprint:
-  name: "Notification basique"
-  description: "Envoie une notification basée sur une entité."
+  name: "Notification basique (trigger automation)"
+  description: "Envoie une notification lorsque l'automatisation est déclenchée via un 'automation_trigger'."
   domain: automation
   input:
-    entite_declencheur:
-      name: "Entité de déclenchement"
-      description: "L'entité qui déclenche la notification."
-      selector:
-        entity: {}
     message:
       name: "Message de notification"
       description: "Le message à envoyer dans la notification."
@@ -20,14 +15,14 @@ blueprint:
         text: {}
     service_notification:
       name: "Service de notification"
-      description: "Entrez le service de notification à utiliser (ex: notify.mobile_app_mon_telephone)"
+      description: "Entrez le service de notification à utiliser (ex: notify.mobile_app_mon_telephone)."
       selector:
         text: {}
       default: "notify.notify"
 
 trigger:
-  - platform: state
-    entity_id: !input entite_declencheur
+  - platform: event
+    event_type: automation_trigger
 
 action:
   - service: !input service_notification
