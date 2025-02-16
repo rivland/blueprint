@@ -16,7 +16,6 @@ blueprint:
       description: "Choisir le capteur de présence (binary_sensor ou person)."
       selector:
         entity:
-          multiple: false
           domain:
             - binary_sensor
             - person
@@ -94,15 +93,6 @@ max_exceeded: silent
 
 variables:
   notification_id: "notif_{{ now().timestamp() | int }}"
-  actions_list: >-
-    {% if ajouter_boutons %}
-    - action: "action_1"
-      title: "{{ nom_bouton_1 }}"
-    - action: "action_2"
-      title: "{{ nom_bouton_2 }}"
-    {% else %}
-    []
-    {% endif %}
 
 trigger:
   - platform: template
@@ -120,7 +110,15 @@ action:
       message: "{{ message_notification }}"
       data:
         notification_id: "{{ notification_id }}"
-        actions: "{{ actions_list }}"
+        actions: >-
+          {% if ajouter_boutons %}
+          [
+            {"action": "action_1", "title": "{{ nom_bouton_1 }}"},
+            {"action": "action_2", "title": "{{ nom_bouton_2 }}"}
+          ]
+          {% else %}
+          []
+          {% endif %}
 
   - choose:
       - conditions:
