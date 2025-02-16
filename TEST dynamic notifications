@@ -19,7 +19,7 @@ blueprint:
       selector:
         entity:
           domain: person
-      required: "{{ mode_de_clenchement == 'Personne' }}"
+      default: ""
 
     capteur_proximite:
       name: "Capteur de proximité"
@@ -27,7 +27,7 @@ blueprint:
       selector:
         entity:
           domain: sensor
-      required: "{{ mode_de_clenchement == 'Proximité' }}"
+      default: ""
 
     distance_maximale:
       name: "Distance maximale de détection"
@@ -38,7 +38,7 @@ blueprint:
           max: 50
           unit_of_measurement: "m"
           step: 0.5
-      required: "{{ mode_de_clenchement == 'Proximité' }}"
+      default: 5
 
     nom_bouton_1:
       name: "Nom du premier bouton"
@@ -80,3 +80,4 @@ blueprint:
           min: 0
           max: 100
           step: 1
+      default: 5
