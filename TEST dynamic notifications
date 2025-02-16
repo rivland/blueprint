@@ -84,7 +84,7 @@ trigger:
 
 condition:
   - condition: template
-    value_template: "{{ mode_de_clenchement == 'Proximité' and personne_cible is not none or mode_de_clenchement == 'Présence' }}"
+    value_template: "{{ mode_de_clenchement == 'Proximité' and (personne_cible is not none) or mode_de_clenchement == 'Présence' }}"
 
 action:
   - service: notify.mobile_app
