@@ -1,5 +1,5 @@
 blueprint:
-  name: Notification de présence avec boutons interactifs
+  name: "Notification de présence avec boutons interactifs"
   description: "Crée une notification interactive pour la présence à la maison, avec suppression automatique et boutons pour plus d'interaction."
   domain: automation
   input:
