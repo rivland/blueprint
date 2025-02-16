@@ -92,6 +92,18 @@ blueprint:
 mode: restart
 max_exceeded: silent
 
+variables:
+  notification_id: "notif_{{ now().timestamp() | int }}"
+  actions_list: >-
+    {% if ajouter_boutons %}
+    - action: "action_1"
+      title: "{{ nom_bouton_1 }}"
+    - action: "action_2"
+      title: "{{ nom_bouton_2 }}"
+    {% else %}
+    []
+    {% endif %}
+
 trigger:
   - platform: template
     value_template: >
@@ -102,21 +114,13 @@ trigger:
       {% endif %}
 
 action:
-  - variables:
-      notification_id: "notif_{{ now().timestamp() | int }}"
   - service: notify.mobile_app_XXX
     data:
       title: "Notification"
       message: "{{ message_notification }}"
       data:
         notification_id: "{{ notification_id }}"
-        {% if ajouter_boutons %}
-        actions:
-          - action: "action_1"
-            title: "{{ nom_bouton_1 }}"
-          - action: "action_2"
-            title: "{{ nom_bouton_2 }}"
-        {% endif %}
+        actions: "{{ actions_list }}"
 
   - choose:
       - conditions:
