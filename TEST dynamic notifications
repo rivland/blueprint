@@ -22,11 +22,10 @@ blueprint:
       default: binary_sensor.maison_occupee
     personne_cible:
       name: Personne suivie
-      description: La personne à suivre pour la proximité (requise uniquement si "Proximité" est sélectionné)
+      description: La personne à suivre pour la proximité
       selector:
         entity:
           domain: person
-      required: "{{ mode_de_clenchement == 'Proximité' }}"
     distance_max:
       name: Distance maximale
       description: Distance maximale pour la détection de la personne
