@@ -1,149 +1,102 @@
 blueprint:
-  name: Notification avancée avec actions et suppression
-  description: "Envoie une notification en fonction de la présence ou de la proximité, avec boutons interactifs et suppression automatique."
+  name: Notification de présence
+  description: Envoie une notification basée sur la présence ou la proximité.
   domain: automation
   input:
-    mode_declenchement:
+    mode_de_clenchement:
       name: Mode de déclenchement
-      description: "Choisir si la notification est déclenchée par la présence ou la proximité."
+      description: Choisissez le mode de déclenchement (présence ou proximité)
       selector:
         select:
           options:
-            - "Présence"
-            - "Proximité"
+            - Présence
+            - Proximité
+      default: Présence
     capteur_presence:
       name: Capteur de présence
-      description: "Choisir le capteur de présence (binary_sensor ou person)."
+      description: Le capteur à utiliser pour détecter la présence
       selector:
         entity:
-          domain:
-            - binary_sensor
-            - person
-    distance_max:
-      name: Distance max (si mode Proximité)
-      description: "Distance en km en dessous de laquelle la notification est envoyée."
-      selector:
-        number:
-          min: 1
-          max: 50
-          step: 0.1
+          domain: binary_sensor
+          device_class: occupancy
+      default: binary_sensor.maison_occupee
     personne_cible:
-      name: Personne suivie (si mode Proximité)
-      description: "Sélectionner la personne pour le suivi de proximité."
+      name: Personne suivie
+      description: La personne à suivre pour la proximité (requise uniquement si "Proximité" est sélectionné)
       selector:
         entity:
           domain: person
-    message_notification:
-      name: Message de la notification
-      description: "Le message qui sera envoyé dans la notification."
+      required: "{{ mode_de_clenchement == 'Proximité' }}"
+    distance_max:
+      name: Distance maximale
+      description: Distance maximale pour la détection de la personne
       selector:
-        text:
-    ajouter_boutons:
-      name: Ajouter des boutons interactifs
-      description: "Activer pour inclure des boutons dans la notification."
+        number:
+          min: 0
+          max: 100
+          unit_of_measurement: 'm'
+          mode: box
+      default: 10
+    action_bouton_1:
+      name: Action bouton 1
+      description: Action à exécuter lors de l'appui sur le premier bouton
       selector:
-        boolean:
+        action: {}
     nom_bouton_1:
       name: Nom du bouton 1
-      description: "Texte affiché sur le premier bouton."
+      description: Nom du bouton qui déclenche l'action 1
       selector:
-        text:
-    action_bouton_1:
-      name: Action du bouton 1
-      description: "Action à exécuter en appuyant sur le bouton."
+        text: {}
+    action_bouton_2:
+      name: Action bouton 2
+      description: Action à exécuter lors de l'appui sur le deuxième bouton
       selector:
         action: {}
     nom_bouton_2:
       name: Nom du bouton 2
-      description: "Texte affiché sur le deuxième bouton."
+      description: Nom du bouton qui déclenche l'action 2
       selector:
-        text:
-    action_bouton_2:
-      name: Action du bouton 2
-      description: "Action à exécuter en appuyant sur le bouton."
-      selector:
-        action: {}
-    suppression_auto:
-      name: Supprimer automatiquement la notification
-      description: "Activer pour supprimer la notification quand l'état change."
-      selector:
-        boolean:
+        text: {}
     condition_suppression:
-      name: Condition de suppression
-      description: "Entité dont l’état doit changer pour déclencher la suppression."
+      name: Condition pour supprimer la notification
+      description: Condition pour la suppression de la notification si nécessaire
       selector:
-        entity:
+        text: {}
     valeur_suppression:
-      name: Valeur déclenchant la suppression
-      description: "Valeur de l’entité qui déclenchera la suppression de la notification."
+      name: Valeur de suppression
+      description: Valeur à atteindre pour supprimer la notification
       selector:
-        text:
-
-mode: restart
-max_exceeded: silent
-
-variables:
-  notification_id: "notif_{{ now().timestamp() | int }}"
+        number:
+          min: 0
+          max: 100
+          mode: box
+      default: 5
+    ajouter_boutons:
+      name: Ajouter des boutons
+      description: Ajouter des boutons à la notification
+      selector:
+        boolean: {}
+      default: false
 
 trigger:
-  - platform: template
-    value_template: >
-      {% if mode_declenchement == "Présence" %}
-        {{ is_state(capteur_presence, "on") }}
-      {% elif mode_declenchement == "Proximité" and personne_cible is not none and distance_max is not none %}
-        {{ states[personne_cible].attributes.distance | float < distance_max }}
-      {% endif %}
+  - platform: state
+    entity_id: !input capteur_presence
+    to: "on"
+
+condition:
+  - condition: template
+    value_template: "{{ mode_de_clenchement == 'Proximité' and personne_cible is not none or mode_de_clenchement == 'Présence' }}"
 
 action:
-  - service: notify.mobile_app_XXX
+  - service: notify.mobile_app
     data:
-      title: "Notification"
-      message: "{{ message_notification }}"
+      message: "Présence détectée"
+      title: "Alerta de présence"
       data:
-        notification_id: "{{ notification_id }}"
-        actions: >
-          {% if ajouter_boutons %}
-          [
-            {% if nom_bouton_1 %}
-              {"action": "action_1", "title": "{{ nom_bouton_1 }}"}{% if nom_bouton_2 %}, {% endif %}
-            {% endif %}
-            {% if nom_bouton_2 %}
-              {"action": "action_2", "title": "{{ nom_bouton_2 }}"}
-            {% endif %}
-          ]
-          {% else %}
-          []
-          {% endif %}
-
-  - choose:
-      - conditions: "{{ ajouter_boutons }}"
-        sequence:
-          - wait_for_trigger:
-              - platform: event
-                event_type: mobile_app_notification_action
-                event_data:
-                  action: "action_1"
-          - choose:
-              - conditions: "{{ action_bouton_1 is not none }}"
-                sequence: "{{ action_bouton_1 }}"
-          - wait_for_trigger:
-              - platform: event
-                event_type: mobile_app_notification_action
-                event_data:
-                  action: "action_2"
-          - choose:
-              - conditions: "{{ action_bouton_2 is not none }}"
-                sequence: "{{ action_bouton_2 }}"
-
-  - choose:
-      - conditions: "{{ suppression_auto and condition_suppression is not none and valeur_suppression is not none }}"
-        sequence:
-          - wait_for_trigger:
-              - platform: state
-                entity_id: "{{ condition_suppression }}"
-                to: "{{ valeur_suppression }}"
-          - service: notify.mobile_app_XXX
-            data:
-              message: "clear_notification"
-              data:
-                notification_id: "{{ notification_id }}"
+        actions:
+          - action: "action_bouton_1"
+            title: "{{ nom_bouton_1 }}"
+          - action: "action_bouton_2"
+            title: "{{ nom_bouton_2 }}"
+        push:
+          sound: "default"
