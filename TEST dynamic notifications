@@ -1,101 +1,82 @@
 blueprint:
-  name: Notification de présence
-  description: Envoie une notification basée sur la présence ou la proximité.
+  name: Notification de présence avec boutons interactifs
+  description: Crée une notification interactive pour la présence à la maison, avec suppression automatique et boutons pour plus d'interaction.
   domain: automation
   input:
     mode_de_clenchement:
       name: Mode de déclenchement
-      description: Choisissez le mode de déclenchement (présence ou proximité)
+      description: Choisissez comment la présence est détectée : par une personne ou par la proximité.
       selector:
         select:
           options:
-            - Présence
+            - Personne
             - Proximité
-      default: Présence
-    capteur_presence:
-      name: Capteur de présence
-      description: Le capteur à utiliser pour détecter la présence
-      selector:
-        entity:
-          domain: binary_sensor
-          device_class: occupancy
-      default: binary_sensor.maison_occupee
-    personne_cible:
-      name: Personne suivie
-      description: La personne à suivre pour la proximité
+      default: 'Personne'
+
+    personne_suivie:
+      name: Personne à suivre
+      description: Sélectionnez la personne à suivre si vous avez choisi "Personne" comme mode de déclenchement.
       selector:
         entity:
           domain: person
-    distance_max:
-      name: Distance maximale
-      description: Distance maximale pour la détection de la personne
+      required: "{{ mode_de_clenchement == 'Personne' }}"
+
+    capteur_proximite:
+      name: Capteur de proximité
+      description: Choisissez le capteur à utiliser si vous avez sélectionné "Proximité" pour détecter la présence.
+      selector:
+        entity:
+          domain: sensor
+      required: "{{ mode_de_clenchement == 'Proximité' }}"
+
+    distance_maximale:
+      name: Distance maximale de détection
+      description: La distance en mètres à partir de laquelle la présence de la personne est détectée.
       selector:
         number:
           min: 0
-          max: 100
-          unit_of_measurement: 'm'
-          mode: box
-      default: 10
-    action_bouton_1:
-      name: Action bouton 1
-      description: Action à exécuter lors de l'appui sur le premier bouton
-      selector:
-        action: {}
+          max: 50
+          unit_of_measurement: "m"
+          step: 0.5
+      required: "{{ mode_de_clenchement == 'Proximité' }}"
+
     nom_bouton_1:
-      name: Nom du bouton 1
-      description: Nom du bouton qui déclenche l'action 1
-      selector:
-        text: {}
-    action_bouton_2:
-      name: Action bouton 2
-      description: Action à exécuter lors de l'appui sur le deuxième bouton
+      name: Nom du premier bouton
+      description: Le texte qui sera affiché sur le premier bouton de la notification.
+      default: "OK"
+      
+    nom_bouton_2:
+      name: Nom du second bouton
+      description: Le texte qui sera affiché sur le second bouton de la notification.
+      default: "Annuler"
+
+    action_bouton_1:
+      name: Action du premier bouton
+      description: L'action qui sera exécutée lorsque le premier bouton sera pressé.
       selector:
         action: {}
-    nom_bouton_2:
-      name: Nom du bouton 2
-      description: Nom du bouton qui déclenche l'action 2
+      
+    action_bouton_2:
+      name: Action du second bouton
+      description: L'action qui sera exécutée lorsque le second bouton sera pressé.
       selector:
-        text: {}
+        action: {}
+
     condition_suppression:
-      name: Condition pour supprimer la notification
-      description: Condition pour la suppression de la notification si nécessaire
+      name: Condition de suppression
+      description: La condition qui détermine quand la notification sera supprimée. Exemple : la distance de la personne ou une autre condition.
       selector:
-        text: {}
-    valeur_suppression:
-      name: Valeur de suppression
-      description: Valeur à atteindre pour supprimer la notification
+        select:
+          options:
+            - Distance
+            - Personne
+      default: 'Distance'
+
+    seuil_suppression:
+      name: Seuil de suppression
+      description: La valeur de seuil à atteindre pour que la notification soit supprimée. Par exemple, "5" pour une distance ou une valeur de capteur.
       selector:
         number:
           min: 0
           max: 100
-          mode: box
-      default: 5
-    ajouter_boutons:
-      name: Ajouter des boutons
-      description: Ajouter des boutons à la notification
-      selector:
-        boolean: {}
-      default: false
-
-trigger:
-  - platform: state
-    entity_id: !input capteur_presence
-    to: "on"
-
-condition:
-  - condition: template
-    value_template: "{{ mode_de_clenchement == 'Proximité' and (personne_cible is not none) or mode_de_clenchement == 'Présence' }}"
-
-action:
-  - service: notify.mobile_app
-    data:
-      message: "Présence détectée"
-      title: "Alerta de présence"
-      data:
-        actions:
-          - action: "action_bouton_1"
-            title: "{{ nom_bouton_1 }}"
-          - action: "action_bouton_2"
-            title: "{{ nom_bouton_2 }}"
-        push:
-          sound: "default"
+          step: 1
