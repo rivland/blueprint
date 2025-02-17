@@ -7,12 +7,12 @@ blueprint:
       name: Message
       description: Le contenu de la notification
       selector:
-        text
+        text: {}
     title:
       name: Titre (optionnel)
       description: Le titre de la notification
       selector:
-        text
+        text: {}
     device_id:
       name: Appareil
       description: L'appareil sur lequel envoyer la notification
