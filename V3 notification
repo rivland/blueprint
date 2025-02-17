@@ -9,23 +9,17 @@ blueprint:
       selector:
         trigger: {}
 
-    enable_title:
-      name: Activer le titre
-      description: "Cochez cette case pour afficher un titre dans la notification."
-      default: false
-      selector:
-        boolean: {}
-
-    notif_title:
-      name: Titre
-      description: "Titre de la notification (utilisé seulement si activé)."
-      default: ""
-      selector:
+    notify_title:
+      name: Title
+      description: "Enter in the title of your notification."
+      default: "📢 Entrez le titre de la notification"
+      selector: 
         text: {}
 
-    notif_message:
+    notify_message:
       name: Message
-      description: "Contenu de la notification."
+      description: "Enter in the message of your notification."
+      default: "✉️ Entrer le message de la notification"
       selector:
         text: {}
 
@@ -49,10 +43,5 @@ action:
       sequence:
         - service: "notify.mobile_app_{{ device_attr(repeat.item, 'name') | lower | replace(' ', '_') }}"
           data:
-            title: >-
-              {% if enable_title and notif_title | length > 0 %}
-                {{ notif_title }}
-              {% else %}
-                {{ omit }}
-              {% endif %}
-            message: "{{ notif_message }}"
+            title: "{{ notify_title }}"
+            message: "{{ notify_message }}"
