@@ -1,46 +1,52 @@
 blueprint:
-  name: Notification dynamique
-  description: Envoie des notifications dynamiques.
+  name: Dynamic Notification
+  description: Sends dynamic notifications.
   domain: automation
 
   input:
-    message:
-      name: Message
-      description: Le contenu du message.
+    trigger:
+      name: Trigger
+      description: The event that triggers the notification.
       required: true
-      selector: text
+      selector: trigger  # Use the trigger selector
 
     title:
-      name: Titre (optionnel)
-      description: Le titre de la notification.
+      name: Title
+      description: The title of the notification.
+      selector: text
+
+    message:
+      name: Message
+      description: The content of the message.
+      required: true
       selector: text
 
     target:
-      name: Service de notification
-      description: Le service de notification à utiliser (ex: notify.mobile_app_mon_telephone).
+      name: Notification Service
+      description: The notification service to use (e.g., notify.mobile_app_your_phone).
       required: true
       selector:
         entity:
-          domain: notify
+          domain: notify  # Use the entity selector for notification services
 
     tag:
-      name: Tag (optionnel)
-      description: Un identifiant pour regrouper les notifications.
+      name: Tag (optional)
+      description: An identifier to group notifications.
       selector: text
 
     dynamic_message:
-      name: Message dynamique (optionnel)
-      description: Message dynamique (Jinja2).
+      name: Dynamic Message (optional)
+      description: Dynamic message (Jinja2).
       selector: text
 
     dynamic_title:
-      name: Titre dynamique (optionnel)
-      description: Titre dynamique (Jinja2).
+      name: Dynamic Title (optional)
+      description: Dynamic title (Jinja2).
       selector: text
 
     dynamic_icon:
-      name: Icône dynamique (optionnel)
-      description: Icône dynamique (Jinja2).
+      name: Dynamic Icon (optional)
+      description: Dynamic icon (Jinja2).
       selector: text
 
   action:
@@ -48,6 +54,7 @@ blueprint:
         message_content: "{{ input.dynamic_message if input.dynamic_message else input.message }}"
         title_content: "{{ input.dynamic_title if input.dynamic_title else input.title }}"
         icon_content: "{{ input.dynamic_icon if input.dynamic_icon else '' }}"
+
     - service: "{{ input.target }}"
       data:
         title: "{{ title_content }}"
