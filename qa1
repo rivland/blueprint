@@ -22,7 +22,6 @@ blueprint:
         entity:
           domain: sensor
           multiple: false
-          optional: true
     voc:
       name: "Capteur de VOC"
       description: "Entité du capteur de VOC (optionnel)"
@@ -30,7 +29,6 @@ blueprint:
         entity:
           domain: sensor
           multiple: false
-          optional: true
     nox:
       name: "Capteur de NOx"
       description: "Entité du capteur de NOx (optionnel)"
@@ -38,7 +36,6 @@ blueprint:
         entity:
           domain: sensor
           multiple: false
-          optional: true
     pm1:
       name: "Capteur de PM1"
       description: "Entité du capteur de PM1 (optionnel)"
@@ -46,7 +43,6 @@ blueprint:
         entity:
           domain: sensor
           multiple: false
-          optional: true
     pm25:
       name: "Capteur de PM2.5"
       description: "Entité du capteur de PM2.5 (optionnel)"
@@ -54,7 +50,6 @@ blueprint:
         entity:
           domain: sensor
           multiple: false
-          optional: true
     pm10:
       name: "Capteur de PM10"
       description: "Entité du capteur de PM10 (optionnel)"
@@ -62,7 +57,6 @@ blueprint:
         entity:
           domain: sensor
           multiple: false
-          optional: true
     pm4:
       name: "Capteur de PM4"
       description: "Entité du capteur de PM4 (optionnel)"
@@ -70,7 +64,6 @@ blueprint:
         entity:
           domain: sensor
           multiple: false
-          optional: true
 
 trigger:
   - platform: state
@@ -126,7 +119,7 @@ action:
         {% endif %}
 
         {# CO2 #}
-        {% if co2 != 100 %}
+        {% if !is_state('!input co2', 'unknown') %}
           {% if co2 <= 600 %}
             {% set scores = scores + [100] %}
           {% elif co2 <= 1000 %}
@@ -141,7 +134,7 @@ action:
         {% endif %}
 
         {# VOC #}
-        {% if voc != 100 %}
+        {% if !is_state('!input voc', 'unknown') %}
           {% if voc <= 100 %}
             {% set scores = scores + [100] %}
           {% elif voc <= 250 %}
@@ -156,7 +149,7 @@ action:
         {% endif %}
 
         {# NOx #}
-        {% if nox != 100 %}
+        {% if !is_state('!input nox', 'unknown') %}
           {% if nox <= 30 %}
             {% set scores = scores + [100] %}
           {% elif nox <= 70 %}
@@ -171,7 +164,7 @@ action:
         {% endif %}
 
         {# PM1 #}
-        {% if pm1 != 100 %}
+        {% if !is_state('!input pm1', 'unknown') %}
           {% if pm1 <= 10 %}
             {% set scores = scores + [100] %}
           {% elif pm1 <= 30 %}
@@ -186,7 +179,7 @@ action:
         {% endif %}
 
         {# PM2.5 #}
-        {% if pm25 != 100 %}
+        {% if !is_state('!input pm25', 'unknown') %}
           {% if pm25 <= 15 %}
             {% set scores = scores + [100] %}
           {% elif pm25 <= 35 %}
@@ -201,7 +194,7 @@ action:
         {% endif %}
 
         {# PM4 #}
-        {% if pm4 != 100 %}
+        {% if !is_state('!input pm4', 'unknown') %}
           {% if pm4 <= 20 %}
             {% set scores = scores + [100] %}
           {% elif pm4 <= 50 %}
@@ -216,7 +209,7 @@ action:
         {% endif %}
 
         {# PM10 #}
-        {% if pm10 != 100 %}
+        {% if !is_state('!input pm10', 'unknown') %}
           {% if pm10 <= 25 %}
             {% set scores = scores + [100] %}
           {% elif pm10 <= 50 %}
