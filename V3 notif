@@ -10,7 +10,7 @@ blueprint:
         trigger: {}
 
     notify_title:
-      name: Title
+      name: Titre
       description: "📢 Entrez le titre de la notification."
       default: ""
       selector: 
