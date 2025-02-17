@@ -12,8 +12,9 @@ blueprint:
       name: Titre (optionnel)
       description: Le titre de la notification
       selector:
-        text
-    device:
+        text:
+        optional: true
+    device_id:
       name: Appareil
       description: L'appareil sur lequel envoyer la notification
       selector:
@@ -22,7 +23,7 @@ blueprint:
 
 trigger:
   platform: mqtt
-  device_id: !input device
+  device_id: !input device_id
   type: action
   subtype: on_press
   trigger: device
@@ -30,8 +31,8 @@ trigger:
 condition: []
 
 action:
-  service: notify.mobile_app_{{ device }}
+  service: notify.mobile_app_!input device_id
   data:
     message: !input message
-    title: "{{ title | default('') }}"
+    title: "{{ title if title else '' }}"
 mode: single
