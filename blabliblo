@@ -19,12 +19,16 @@ blueprint:
       selector:
         device:
           integration: mobile_app
+    trigger_event:
+      name: Déclencheur
+      description: "Sélectionne un déclencheur pour envoyer la notification."
+      selector:
+        trigger: {}
 
 trigger:
-  - device_id: !input device_id
-    domain: mqtt
-    type: action
-    subtype: on_press
+  - platform: template
+    value_template: "{{ trigger_event }}"
+    trigger: device
 
 condition: []
 
