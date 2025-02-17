@@ -28,7 +28,7 @@ blueprint:
 trigger:
   - platform: template
     value_template: "{{ trigger_event }}"
-    trigger: device
+    trigger: {}
 
 condition: []
 
