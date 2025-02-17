@@ -26,9 +26,3 @@ blueprint:
       description: Le service de notification à utiliser (ex: notify.mobile_app_mon_telephone).
       required: true
       selector: target
-
-  action:
-    - service: "{{ input.target }}"
-      data:
-        title: "{{ input.title }}"
-        message: "{{ input.message }}"
