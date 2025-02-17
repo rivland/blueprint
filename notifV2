@@ -19,29 +19,29 @@ blueprint:
       name: Service de notification
       description: Le service de notification à utiliser (ex: notify.mobile_app_mon_telephone).
       required: true
-      selector: text  # Changed to text selector
+      selector: text  # On garde le sélecteur texte
 
     tag:
       name: Tag (optionnel)
-      description: Un identifiant pour regrouper les notifications (utile pour les remplacer ou les supprimer).
+      description: Un identifiant pour regrouper les notifications.
       selector: text
 
     dynamic_message:
       name: Message dynamique (optionnel)
-      description: Un message qui sera mis à jour dynamiquement. Utilisez des templates Jinja2.
+      description: Message dynamique (Jinja2).
       selector: text
 
     dynamic_title:
       name: Titre dynamique (optionnel)
-      description: Un titre qui sera mis à jour dynamiquement. Utilisez des templates Jinja2.
+      description: Titre dynamique (Jinja2).
       selector: text
 
     dynamic_icon:
       name: Icône dynamique (optionnel)
-      description: Une icône qui sera mise à jour dynamiquement. Utilisez des templates Jinja2 (ex: mdi:...).
+      description: Icône dynamique (Jinja2).
       selector: text
 
-  variables:
+  variables:  # Ces variables sont maintenant passées au script
     message_content: "{{ input.message }}"
     title_content: "{{ input.title }}"
     icon_content: "{{ input.icon }}"
@@ -59,10 +59,10 @@ blueprint:
     {% endif %}
 
   action:
-    - service: "{{ input.target }}" # No changes here
+    - service: script.send_dynamic_notification  # On appelle le script
       data:
+        target: "{{ input.target }}" # Le service est passé ici
         message: "{{ message_content }}"
         title: "{{ title_content }}"
-        data:
-          tag: "{{ input.tag }}"
-          icon: "{{ icon_content }}"
+        tag: "{{ input.tag }}"
+        icon: "{{ icon_content }}"
