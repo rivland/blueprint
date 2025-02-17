@@ -5,13 +5,13 @@ blueprint:
   input:
     temperature:
       name: "Capteur de Température"
-      description: "Entité du capteur de température"
+      description: "Entité du capteur de température (obligatoire)"
       selector:
         entity:
           domain: sensor
     humidity:
       name: "Capteur d'Humidité"
-      description: "Entité du capteur d'humidité"
+      description: "Entité du capteur d'humidité (obligatoire)"
       selector:
         entity:
           domain: sensor
@@ -22,6 +22,7 @@ blueprint:
         entity:
           domain: sensor
           multiple: false
+      default: ""
     voc:
       name: "Capteur de VOC"
       description: "Entité du capteur de VOC (optionnel)"
@@ -29,6 +30,7 @@ blueprint:
         entity:
           domain: sensor
           multiple: false
+      default: ""
     nox:
       name: "Capteur de NOx"
       description: "Entité du capteur de NOx (optionnel)"
@@ -36,6 +38,7 @@ blueprint:
         entity:
           domain: sensor
           multiple: false
+      default: ""
     pm1:
       name: "Capteur de PM1"
       description: "Entité du capteur de PM1 (optionnel)"
@@ -43,6 +46,7 @@ blueprint:
         entity:
           domain: sensor
           multiple: false
+      default: ""
     pm25:
       name: "Capteur de PM2.5"
       description: "Entité du capteur de PM2.5 (optionnel)"
@@ -50,6 +54,7 @@ blueprint:
         entity:
           domain: sensor
           multiple: false
+      default: ""
     pm10:
       name: "Capteur de PM10"
       description: "Entité du capteur de PM10 (optionnel)"
@@ -57,6 +62,7 @@ blueprint:
         entity:
           domain: sensor
           multiple: false
+      default: ""
     pm4:
       name: "Capteur de PM4"
       description: "Entité du capteur de PM4 (optionnel)"
@@ -64,6 +70,7 @@ blueprint:
         entity:
           domain: sensor
           multiple: false
+      default: ""
 
 trigger:
   - platform: state
@@ -71,7 +78,10 @@ trigger:
       - !input temperature
       - !input humidity
 
-condition: []
+condition:
+  - condition: template
+    value_template: >
+      {{ not is_state('!input temperature', 'unknown') and not is_state('!input humidity', 'unknown') }}
 
 action:
   - service: input_number.set_value
@@ -79,15 +89,16 @@ action:
       entity_id: input_number.qualite_air
     data:
       value: >
-        {% set co2 = states('!input co2') | float(default=100) %}
+        {% set co2 = states('!input co2') | float(default=100) if '!input co2' else 100 %}
         {% set temp = states('!input temperature') | float(default=100) %}
         {% set humidity = states('!input humidity') | float(default=100) %}
-        {% set voc = states('!input voc') | float(default=100) %}
-        {% set nox = states('!input nox') | float(default=100) %}
-        {% set pm1 = states('!input pm1') | float(default=100) %}
-        {% set pm25 = states('!input pm25') | float(default=100) %}
-        {% set pm10 = states('!input pm10') | float(default=100) %}
-        {% set pm4 = states('!input pm4') | float(default=100) %}
+        {% set voc = states('!input voc') | float(default=100) if '!input voc' else 100 %}
+        {% set nox = states('!input nox') | float(default=100) if '!input nox' else 100 %}
+        {% set pm1 = states('!input pm1') | float(default=100) if '!input pm1' else 100 %}
+        {% set pm25 = states('!input pm25') | float(default=100) if '!input pm25' else 100 %}
+        {% set pm10 = states('!input pm10') | float(default=100) if '!input pm10' else 100 %}
+        {% set pm4 = states('!input pm4') | float(default=100) if '!input pm4' else 100 %}
+
         {% set scores = [] %}
         {% set temperature_ideal = 21 %}
         {% set temperature_deviation = (temp - temperature_ideal) | abs %}
@@ -96,9 +107,7 @@ action:
         {% set humidity_max = 80 %}
         {% set temperature_max = 15 %}
 
-        {# Calcul des scores individuels pour chaque capteur, ajoutée d'après les codes précédents #}
-
-        {# Temperature #}
+        {# Température #}
         {% if temperature_deviation <= 1 %}
           {% set scores = scores + [100] %}
         {% elif temperature_deviation > temperature_max %}
@@ -119,7 +128,7 @@ action:
         {% endif %}
 
         {# CO2 #}
-        {% if !is_state('!input co2', 'unknown') %}
+        {% if co2 != 100 %}
           {% if co2 <= 600 %}
             {% set scores = scores + [100] %}
           {% elif co2 <= 1000 %}
@@ -133,98 +142,25 @@ action:
           {% endif %}
         {% endif %}
 
-        {# VOC #}
-        {% if !is_state('!input voc', 'unknown') %}
-          {% if voc <= 100 %}
-            {% set scores = scores + [100] %}
-          {% elif voc <= 250 %}
-            {% set scores = scores + [70] %}
-          {% elif voc <= 500 %}
-            {% set scores = scores + [40] %}
-          {% elif voc <= 750 %}
-            {% set scores = scores + [20] %}
-          {% else %}
-            {% set scores = scores + [10] %}
+        {# Autres capteurs : mêmes conditions, ajout uniquement si présents #}
+        {% for sensor in [voc, nox, pm1, pm25, pm10, pm4] %}
+          {% if sensor != 100 %}
+            {% if sensor <= 10 %}
+              {% set scores = scores + [100] %}
+            {% elif sensor <= 30 %}
+              {% set scores = scores + [70] %}
+            {% elif sensor <= 50 %}
+              {% set scores = scores + [40] %}
+            {% elif sensor <= 80 %}
+              {% set scores = scores + [20] %}
+            {% else %}
+              {% set scores = scores + [10] %}
+            {% endif %}
           {% endif %}
-        {% endif %}
-
-        {# NOx #}
-        {% if !is_state('!input nox', 'unknown') %}
-          {% if nox <= 30 %}
-            {% set scores = scores + [100] %}
-          {% elif nox <= 70 %}
-            {% set scores = scores + [70] %}
-          {% elif nox <= 150 %}
-            {% set scores = scores + [40] %}
-          {% elif nox <= 200 %}
-            {% set scores = scores + [20] %}
-          {% else %}
-            {% set scores = scores + [10] %}
-          {% endif %}
-        {% endif %}
-
-        {# PM1 #}
-        {% if !is_state('!input pm1', 'unknown') %}
-          {% if pm1 <= 10 %}
-            {% set scores = scores + [100] %}
-          {% elif pm1 <= 30 %}
-            {% set scores = scores + [70] %}
-          {% elif pm1 <= 50 %}
-            {% set scores = scores + [40] %}
-          {% elif pm1 <= 80 %}
-            {% set scores = scores + [20] %}
-          {% else %}
-            {% set scores = scores + [10] %}
-          {% endif %}
-        {% endif %}
-
-        {# PM2.5 #}
-        {% if !is_state('!input pm25', 'unknown') %}
-          {% if pm25 <= 15 %}
-            {% set scores = scores + [100] %}
-          {% elif pm25 <= 35 %}
-            {% set scores = scores + [70] %}
-          {% elif pm25 <= 60 %}
-            {% set scores = scores + [40] %}
-          {% elif pm25 <= 100 %}
-            {% set scores = scores + [20] %}
-          {% else %}
-            {% set scores = scores + [10] %}
-          {% endif %}
-        {% endif %}
-
-        {# PM4 #}
-        {% if !is_state('!input pm4', 'unknown') %}
-          {% if pm4 <= 20 %}
-            {% set scores = scores + [100] %}
-          {% elif pm4 <= 50 %}
-            {% set scores = scores + [70] %}
-          {% elif pm4 <= 80 %}
-            {% set scores = scores + [40] %}
-          {% elif pm4 <= 120 %}
-            {% set scores = scores + [20] %}
-          {% else %}
-            {% set scores = scores + [10] %}
-          {% endif %}
-        {% endif %}
-
-        {# PM10 #}
-        {% if !is_state('!input pm10', 'unknown') %}
-          {% if pm10 <= 25 %}
-            {% set scores = scores + [100] %}
-          {% elif pm10 <= 50 %}
-            {% set scores = scores + [70] %}
-          {% elif pm10 <= 100 %}
-            {% set scores = scores + [40] %}
-          {% elif pm10 <= 150 %}
-            {% set scores = scores + [20] %}
-          {% else %}
-            {% set scores = scores + [10] %}
-          {% endif %}
-        {% endif %}
+        {% endfor %}
 
         {# Calcul du score final #}
-        {% set final_score = (scores | sum / scores | length) %}
+        {% set final_score = scores | sum / scores | length %}
         {% if co2 != 100 and co2 > 1200 %}
           {% set final_score = final_score - 25 %}
         {% endif %}
