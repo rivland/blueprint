@@ -1,5 +1,5 @@
 blueprint:
-  name: Notification Dynamique - Base
+  name: Notification - Base
   description: "Envoie une notification personnalisée selon un déclencheur défini."
   domain: automation
   input:
@@ -11,15 +11,15 @@ blueprint:
 
     notify_title:
       name: Title
-      description: "Enter in the title of your notification."
-      default: "📢 Entrez le titre de la notification"
+      description: "📢 Entrez le titre de la notification."
+      default: ""
       selector: 
         text: {}
 
     notify_message:
       name: Message
-      description: "Enter in the message of your notification."
-      default: "✉️ Entrer le message de la notification"
+      description: "✉️ Entrer le message de la notification."
+      default: ""
       selector:
         text: {}
 
