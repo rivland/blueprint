@@ -26,15 +26,14 @@ blueprint:
       name: Destinataire
       description: "Choisis où envoyer la notification (ex: mobile, groupe, etc.)."
       selector:
-        entity:
-          domain: notify
+        target: {}
 
 mode: restart
 
 trigger: !input trigger_event
 
 action:
-  - service: notify.!input notif_target
+  - service: "notify.{{ (notif_target.entity_id | replace('notify.', '')) if notif_target.entity_id else 'default' }}"
     data:
       title: "{{ iif(notif_title != '', notif_title, omit) }}"
       message: "{{ notif_message }}"
