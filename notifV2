@@ -25,3 +25,44 @@ blueprint:
       name: Tag (optionnel)
       description: Un identifiant pour regrouper les notifications (utile pour les remplacer ou les supprimer).
       selector: text
+
+    dynamic_message:
+      name: Message dynamique (optionnel)
+      description: Un message qui sera mis à jour dynamiquement. Utilisez des templates Jinja2.
+      selector: text
+
+    dynamic_title:
+      name: Titre dynamique (optionnel)
+      description: Un titre qui sera mis à jour dynamiquement. Utilisez des templates Jinja2.
+      selector: text
+
+    dynamic_icon:
+      name: Icône dynamique (optionnel)
+      description: Une icône qui sera mise à jour dynamiquement. Utilisez des templates Jinja2 (ex: mdi:...).
+      selector: text
+
+  variables:
+    message_content: "{{ input.message }}"
+    title_content: "{{ input.title }}"
+    icon_content: "{{ input.icon }}"
+
+    {% if input.dynamic_message %}
+      message_content: "{{ input.dynamic_message }}"
+    {% endif %}
+
+    {% if input.dynamic_title %}
+      title_content: "{{ input.dynamic_title }}"
+    {% endif %}
+
+     {% if input.dynamic_icon %}
+      icon_content: "{{ input.dynamic_icon }}"
+    {% endif %}
+
+  action:
+    - service: "{{ input.target }}"
+      data:
+        message: "{{ message_content }}"
+        title: "{{ title_content }}"
+        data:
+          tag: "{{ input.tag }}"
+          icon: "{{ icon_content }}"
