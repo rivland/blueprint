@@ -1,0 +1,40 @@
+blueprint:
+  name: Notification Dynamique - Base
+  description: "Envoie une notification personnalisée selon un déclencheur défini."
+  domain: automation
+  input:
+    trigger_event:
+      name: Déclencheur
+      description: "Sélectionne un déclencheur pour envoyer la notification."
+      selector:
+        trigger: {}
+
+    notif_title:
+      name: Titre (optionnel)
+      description: "Titre de la notification (laisser vide pour ne pas afficher)."
+      default: ""
+      selector:
+        text: {}
+
+    notif_message:
+      name: Message
+      description: "Contenu de la notification."
+      selector:
+        text: {}
+
+    notif_target:
+      name: Destinataire
+      description: "Choisis où envoyer la notification (ex: mobile, groupe, etc.)."
+      selector:
+        entity:
+          domain: notify
+
+mode: restart
+
+trigger: !input trigger_event
+
+action:
+  - service: notify.!input notif_target
+    data:
+      title: "{{ iif(notif_title != '', notif_title, omit) }}"
+      message: "{{ notif_message }}"
