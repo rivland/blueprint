@@ -7,13 +7,13 @@ blueprint:
       name: Message
       description: Le contenu de la notification
       selector:
-        text:
+        text
     title:
-      name: Titre
+      name: Titre (optionnel)
       description: Le titre de la notification
       selector:
-        text:
-    device:
+        text
+    device_id:
       name: Appareil
       description: L'appareil sur lequel envoyer la notification
       selector:
@@ -21,25 +21,25 @@ blueprint:
           integration: mobile_app
 
 trigger:
-  platform: mqtt
-  device_id: !input device
-  type: action
-  subtype: on_press
-  trigger: device
+  - device_id: !input device_id
+    domain: mqtt
+    type: action
+    subtype: on_press
 
 condition: []
 
 action:
   - choose:
       - conditions:
-          - "{{ title != '' }}"
+          - condition: template
+            value_template: "{{ title != '' }}"
         sequence:
-          - service: notify.mobile_app_{{ device }}
+          - service: notify.mobile_app_{{ device_id }}
             data:
               message: !input message
               title: !input title
     default:
-      - service: notify.mobile_app_{{ device }}
+      - service: notify.mobile_app_{{ device_id }}
         data:
           message: !input message
 mode: single
