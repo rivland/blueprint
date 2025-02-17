@@ -8,21 +8,18 @@ blueprint:
       description: "Sélectionne un déclencheur pour envoyer la notification."
       selector:
         trigger: {}
-
     notify_title:
       name: Titre
       description: "📢 Entrez le titre de la notification."
       default: ""
       selector: 
         text: {}
-
     notify_message:
       name: Message
       description: "✉️ Entrer le message de la notification."
       default: ""
       selector:
         text: {}
-
     notify_device:
       name: Appareil(s) à notifier
       description: "Sélectionne les appareils à notifier lorsque l'automatisation se déclenche."
@@ -32,16 +29,13 @@ blueprint:
           filter:
             - integration: mobile_app
           multiple: true
-
 mode: restart
-
 trigger: !input trigger_event
-
 action:
   - repeat:
       for_each: !input notify_device
       sequence:
-        - service: "notify.mobile_app_{{ device_attr(repeat.item, 'name')}}"
-          data:
-            message: "ATTENTION !!!"
-            title: "La bombe va exploser !!!"
+        - service: "notify.mobile_app_{{ device_attr(repeat.item, 'name') }}"
+          data_template:
+            message: "{{ blueprint.inputs.notify_message }}"
+            title: "{{ blueprint.inputs.notify_title }}"
