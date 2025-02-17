@@ -19,7 +19,7 @@ blueprint:
       name: Service de notification
       description: Le service de notification à utiliser (ex: notify.mobile_app_mon_telephone).
       required: true
-      selector: target
+      selector: text  # Changed to text selector
 
     tag:
       name: Tag (optionnel)
@@ -59,7 +59,7 @@ blueprint:
     {% endif %}
 
   action:
-    - service: "{{ input.target }}"
+    - service: "{{ input.target }}" # No changes here
       data:
         message: "{{ message_content }}"
         title: "{{ title_content }}"
