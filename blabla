@@ -1,0 +1,46 @@
+blueprint:
+  name: Send Notification with Title and Message
+  description: Envoie une notification avec un titre et un message à vos téléphones.
+  domain: automation
+  input:
+    title_enabled:
+      name: Activer le Titre
+      description: Si activé, le titre sera inclus dans la notification.
+      default: true
+      selector:
+        boolean:
+    title:
+      name: Titre
+      description: Le titre de la notification.
+      default: "📢 Entrez le titre de la notification"
+      selector:
+        text:
+    message:
+      name: Message
+      description: Le message de la notification.
+      default: "✉️ Entrer le message de la notification."
+      selector:
+        text:
+    recipient:
+      name: Destinataire
+      description: La personne ou le groupe à qui envoyer la notification.
+      default: "mobile_app"
+      selector:
+        device:
+          integration: mobile_app
+
+trigger:
+  platform: state
+  entity_id: person.xxx
+  to: 'home'
+
+action:
+  service: notify.mobile_app
+  data_template:
+    title: >
+      {% if is_state('input_boolean.title_enabled', 'on') %}
+        {{ title }}
+      {% else %}
+        ""
+      {% endif %}
+    message: "{{ message }}"
