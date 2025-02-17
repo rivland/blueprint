@@ -43,5 +43,5 @@ action:
       sequence:
         - service: "notify.mobile_app_{{ device_attr(repeat.item, 'name')}}"
           data:
-            message: "{{ notify_message }}"
-            title: "{{ notify_title }}"
+            message: "ATTENTION !!!"
+            title: "La bombe va exploser !!!"
