@@ -13,7 +13,6 @@ blueprint:
       description: Le titre de la notification
       selector:
         text:
-        optional: true
     device_id:
       name: Appareil
       description: L'appareil sur lequel envoyer la notification
@@ -29,4 +28,4 @@ action:
   service: notify.mobile_app_{{ device_id }}
   data:
     message: !input message
-    title: !input title
+    title: "{{ title | default('') }}"
