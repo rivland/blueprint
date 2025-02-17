@@ -1,31 +1,67 @@
 blueprint:
-  name: "Notification basique (trigger automation)"
-  description: "Envoie une notification lorsque l'automatisation est déclenchée via un 'automation_trigger'."
+  name: "Notification basique avec sélection de déclencheur"
+  description: >
+    Envoie une notification via le service spécifié,
+    déclenchée soit par le changement d'état d'une entité, soit par un événement d'automatisation.
   domain: automation
   input:
-    message:
-      name: "Message de notification"
-      description: "Le message à envoyer dans la notification."
+    type_de_declencheur:
+      name: "Type de déclencheur"
+      description: "Sélectionnez le type de déclencheur à utiliser."
       selector:
-        text: {}
+        select:
+          options:
+            - "État"
+            - "Automatisation"
+      default: "État"
+    entite_declencheur:
+      name: "Entité de déclenchement"
+      description: >
+        Sélectionnez l'entité à surveiller pour le déclencheur.
+        (Ce champ sera utilisé uniquement si le type de déclencheur est "État".)
+      selector:
+        entity: {}
+      default: ""
     titre:
       name: "Titre de la notification"
       description: "Le titre de la notification."
       selector:
         text: {}
+    message:
+      name: "Message de notification"
+      description: "Le message à envoyer dans la notification."
+      selector:
+        text: {}
     service_notification:
       name: "Service de notification"
-      description: "Entrez le service de notification à utiliser (ex: notify.mobile_app_mon_telephone)."
+      description: >
+        Entrez le service de notification à utiliser, par exemple 
+        'notify.mobile_app_mon_telephone'. (Ce champ est un texte.)
       selector:
         text: {}
       default: "notify.notify"
 
 trigger:
+  # Trigger de type 'state' pour le cas "État"
+  - platform: state
+    entity_id: !input entite_declencheur
+  # Trigger de type 'event' pour le cas "Automatisation"
   - platform: event
     event_type: automation_trigger
+
+condition:
+  - condition: template
+    value_template: >
+      {% if type_de_declencheur == "État" %}
+        {{ trigger.platform == "state" }}
+      {% elif type_de_declencheur == "Automatisation" %}
+        {{ trigger.platform == "event" }}
+      {% else %}
+        false
+      {% endif %}
 
 action:
   - service: !input service_notification
     data:
-      message: !input message
       title: !input titre
+      message: !input message
