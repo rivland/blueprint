@@ -1,6 +1,6 @@
 blueprint:
-  name: Notification - Base
-  description: "Envoie une notification personnalisée selon un déclencheur défini."
+  name: Notification - iOS Test
+  description: "Envoie une notification personnalisée aux appareils iOS."
   domain: automation
   input:
     trigger_event:
@@ -16,18 +16,19 @@ blueprint:
         text: {}
     notify_message:
       name: Message
-      description: "✉️ Entrer le message de la notification."
+      description: "✉️ Entrez le message de la notification."
       default: ""
       selector:
         text: {}
     notify_device:
       name: Appareil(s) à notifier
-      description: "Sélectionne les appareils à notifier lorsque l'automatisation se déclenche."
+      description: "Sélectionne les appareils iOS à notifier lorsque l'automatisation se déclenche."
       default: []
       selector:
         device:
           filter:
             - integration: mobile_app
+            - manufacturer: Apple
           multiple: true
 mode: restart
 trigger: !input trigger_event
@@ -36,6 +37,6 @@ action:
       for_each: !input notify_device
       sequence:
         - service: "notify.mobile_app_{{ device_attr(repeat.item, 'name') }}"
-          data_template:
-            message: "{{ blueprint.inputs.notify_message }}"
-            title: "{{ blueprint.inputs.notify_title }}"
+          data:
+            message: !input notify_message
+            title: !input notify_title
