@@ -74,7 +74,7 @@ blueprint:
 
 trigger:
   - platform: state
-    entity_id: 
+    entity_id:
       - !input temperature
       - !input humidity
 
@@ -84,7 +84,7 @@ action:
   - service: input_number.set_value
     target:
       entity_id: input_number.qualite_air
-    data_template:
+    data:
       value: >
         {% set co2 = states('!input co2') | float(default=100) %}
         {% set temp = states('!input temperature') | float(default=100) %}
