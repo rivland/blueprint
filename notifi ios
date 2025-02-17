@@ -1,6 +1,6 @@
 blueprint:
-  name: Notification - Base
-  description: "Envoie une notification personnalisée selon un déclencheur défini."
+  name: Notification - iOS Only
+  description: "Envoie une notification personnalisée aux appareils iOS."
   domain: automation
   input:
     trigger_event:
@@ -21,13 +21,14 @@ blueprint:
       selector:
         text: {}
     notify_device:
-      name: Appareil(s) à notifier
-      description: "Sélectionne les appareils à notifier lorsque l'automatisation se déclenche."
+      name: Appareil(s) iOS à notifier
+      description: "Sélectionne les appareils iOS à notifier lorsque l'automatisation se déclenche."
       default: []
       selector:
         device:
           filter:
             integration: mobile_app
+            manufacturer: Apple
           multiple: true
 mode: restart
 trigger: !input trigger_event
