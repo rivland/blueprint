@@ -1,68 +1,27 @@
 blueprint:
-  name: "Notification basique avec sélection de déclencheur"
-  description: >
-    Ce blueprint vous permet de choisir entre deux types de déclencheur pour envoyer une notification.
-    Choisissez "État" pour surveiller une entité (ex. un capteur) ou "Automatisation" pour déclencher
-    la notification via l'événement "automation_trigger".
+  name: Notification dynamique
+  description: Envoie des notifications avec des options dynamiques.
   domain: automation
+
   input:
-    type_de_declencheur:
-      name: "Type de déclencheur"
-      description: "Sélectionnez le type de déclencheur à utiliser."
-      selector:
-        select:
-          options:
-            - "État"
-            - "Automatisation"
-      default: "État"
-    entite_declencheur:
-      name: "Entité de déclenchement"
-      description: >
-        Sélectionnez l'entité à surveiller.
-        Ce champ sera utilisé uniquement si vous avez choisi le déclencheur de type "État".
-      selector:
-        entity: {}
-      default: ""
-    titre:
-      name: "Titre de la notification"
-      description: "Le titre de la notification."
-      selector:
-        text: {}
     message:
-      name: "Message de notification"
-      description: "Le message à envoyer dans la notification."
-      selector:
-        text: {}
-    service_notification:
-      name: "Service de notification"
-      description: >
-        Entrez le service de notification à utiliser, par exemple 
-        "notify.mobile_app_mon_telephone".
-      selector:
-        text: {}
-      default: "notify.notify"
+      name: Message
+      description: Le contenu du message.
+      required: true
+      selector: text
 
-trigger:
-  # Déclencheur de type "État" (sera pertinent si le choix est "État")
-  - platform: state
-    entity_id: !input entite_declencheur
-  # Déclencheur de type "Automatisation" (sera pertinent si le choix est "Automatisation")
-  - platform: event
-    event_type: automation_trigger
+    title:
+      name: Titre (optionnel)
+      description: Le titre de la notification.
+      selector: text
 
-condition:
-  - condition: template
-    value_template: >
-      {% if type_de_declencheur == "État" %}
-        {{ trigger.platform == "state" }}
-      {% elif type_de_declencheur == "Automatisation" %}
-        {{ trigger.platform == "event" }}
-      {% else %}
-        false
-      {% endif %}
+    target:
+      name: Service de notification
+      description: Le service de notification à utiliser (ex: notify.mobile_app_mon_telephone).
+      required: true
+      selector: target
 
-action:
-  - service: !input service_notification
-    data:
-      title: !input titre
-      message: !input message
+    tag:
+      name: Tag (optionnel)
+      description: Un identifiant pour regrouper les notifications (utile pour les remplacer ou les supprimer).
+      selector: text
