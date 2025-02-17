@@ -13,7 +13,6 @@ blueprint:
       description: Le titre de la notification
       selector:
         text
-        optional: true
     device:
       name: Appareil
       description: L'appareil sur lequel envoyer la notification
