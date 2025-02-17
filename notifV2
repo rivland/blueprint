@@ -1,68 +1,34 @@
 blueprint:
-  name: Notification dynamique
-  description: Envoie des notifications dynamiques.
+  name: Notification simple
+  description: Envoie une notification avec un titre et un message.
   domain: automation
 
   input:
+    trigger:
+      name: Déclencheur
+      description: L'événement qui déclenche la notification.
+      required: true
+      selector: trigger
+
+    title:
+      name: Titre
+      description: Le titre de la notification.
+      selector: text
+
     message:
       name: Message
       description: Le contenu du message.
       required: true
       selector: text
 
-    title:
-      name: Titre (optionnel)
-      description: Le titre de la notification.
-      selector: text
-
     target:
       name: Service de notification
       description: Le service de notification à utiliser (ex: notify.mobile_app_mon_telephone).
       required: true
-      selector: text
-
-    tag:
-      name: Tag (optionnel)
-      description: Un identifiant pour regrouper les notifications.
-      selector: text
-
-    dynamic_message:
-      name: Message dynamique (optionnel)
-      description: Message dynamique (Jinja2).
-      selector: text
-
-    dynamic_title:
-      name: Titre dynamique (optionnel)
-      description: Titre dynamique (Jinja2).
-      selector: text
-
-    dynamic_icon:
-      name: Icône dynamique (optionnel)
-      description: Icône dynamique (Jinja2).
-      selector: text
-
-  variables:
-    message_content: "{{ input.message }}"
-    title_content: "{{ input.title }}"
-    icon_content: "{{ input.icon }}"
-
-    {% if input.dynamic_message %}
-      message_content: "{{ input.dynamic_message }}"
-    {% endif %}
-
-    {% if input.dynamic_title %}
-      title_content: "{{ input.dynamic_title }}"
-    {% endif %}
-
-     {% if input.dynamic_icon %}
-      icon_content: "{{ input.dynamic_icon }}"
-    {% endif %}
+      selector: target
 
   action:
-    - service: script.send_dynamic_notification
+    - service: "{{ input.target }}"
       data:
-        target: "{{ input.target }}"
-        message: "{{ message_content }}"
-        title: "{{ title_content }}"
-        tag: "{{ input.tag }}"
-        icon: "{{ icon_content }}"
+        title: "{{ input.title }}"
+        message: "{{ input.message }}"
