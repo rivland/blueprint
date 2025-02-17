@@ -1,6 +1,6 @@
 blueprint:
   name: Notification dynamique
-  description: Envoie des notifications avec des options dynamiques.
+  description: Envoie des notifications dynamiques.
   domain: automation
 
   input:
@@ -19,7 +19,7 @@ blueprint:
       name: Service de notification
       description: Le service de notification à utiliser (ex: notify.mobile_app_mon_telephone).
       required: true
-      selector: text  # On garde le sélecteur texte
+      selector: text
 
     tag:
       name: Tag (optionnel)
@@ -41,7 +41,7 @@ blueprint:
       description: Icône dynamique (Jinja2).
       selector: text
 
-  variables:  # Ces variables sont maintenant passées au script
+  variables:
     message_content: "{{ input.message }}"
     title_content: "{{ input.title }}"
     icon_content: "{{ input.icon }}"
@@ -59,9 +59,9 @@ blueprint:
     {% endif %}
 
   action:
-    - service: script.send_dynamic_notification  # On appelle le script
+    - service: script.send_dynamic_notification
       data:
-        target: "{{ input.target }}" # Le service est passé ici
+        target: "{{ input.target }}"
         message: "{{ message_content }}"
         title: "{{ title_content }}"
         tag: "{{ input.tag }}"
