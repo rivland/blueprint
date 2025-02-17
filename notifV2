@@ -1,8 +1,9 @@
 blueprint:
   name: "Notification basique avec sélection de déclencheur"
   description: >
-    Envoie une notification via le service spécifié,
-    déclenchée soit par le changement d'état d'une entité, soit par un événement d'automatisation.
+    Ce blueprint vous permet de choisir entre deux types de déclencheur pour envoyer une notification.
+    Choisissez "État" pour surveiller une entité (ex. un capteur) ou "Automatisation" pour déclencher
+    la notification via l'événement "automation_trigger".
   domain: automation
   input:
     type_de_declencheur:
@@ -17,8 +18,8 @@ blueprint:
     entite_declencheur:
       name: "Entité de déclenchement"
       description: >
-        Sélectionnez l'entité à surveiller pour le déclencheur.
-        (Ce champ sera utilisé uniquement si le type de déclencheur est "État".)
+        Sélectionnez l'entité à surveiller.
+        Ce champ sera utilisé uniquement si vous avez choisi le déclencheur de type "État".
       selector:
         entity: {}
       default: ""
@@ -36,16 +37,16 @@ blueprint:
       name: "Service de notification"
       description: >
         Entrez le service de notification à utiliser, par exemple 
-        'notify.mobile_app_mon_telephone'. (Ce champ est un texte.)
+        "notify.mobile_app_mon_telephone".
       selector:
         text: {}
       default: "notify.notify"
 
 trigger:
-  # Trigger de type 'state' pour le cas "État"
+  # Déclencheur de type "État" (sera pertinent si le choix est "État")
   - platform: state
     entity_id: !input entite_declencheur
-  # Trigger de type 'event' pour le cas "Automatisation"
+  # Déclencheur de type "Automatisation" (sera pertinent si le choix est "Automatisation")
   - platform: event
     event_type: automation_trigger
 
