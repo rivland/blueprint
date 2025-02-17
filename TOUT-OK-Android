@@ -1,5 +1,5 @@
 blueprint:
-  name: Notification - Base
+  name: Notification - Base (OK sous Android)
   description: "Envoie une notification personnalisée selon un déclencheur défini."
   domain: automation
   input:
