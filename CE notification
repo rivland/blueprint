@@ -37,7 +37,10 @@ mode: restart
 trigger: !input trigger_event
 
 action:
-  - service: notify.mobile_app_{{ device_attr(notify_device[0], 'name') | lower | replace(' ', '_') }}
-    data:
-      title: "{{ iif(notif_title != '', notif_title, omit) }}"
-      message: "{{ notif_message }}"
+  - repeat:
+      for_each: !input notify_device
+      sequence:
+        - service: "notify.mobile_app_{{ device_attr(repeat.item, 'name') | lower | replace(' ', '_') }}"
+          data:
+            title: "{{ iif(notif_title != '', notif_title, omit) }}"
+            message: "{{ notif_message }}"
