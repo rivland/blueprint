@@ -1,0 +1,49 @@
+blueprint:
+  name: Alerte température NAS Synology
+  description: Envoie une alerte si la température du NAS dépasse un seuil pendant une durée définie.
+  domain: automation
+  input:
+    temperature_sensor:
+      name: Capteur température NAS
+      selector:
+        entity:
+          domain: sensor
+    seuil_temperature:
+      name: Température max (°C)
+      default: 60
+      selector:
+        number:
+          min: 30
+          max: 90
+          unit_of_measurement: '°C'
+          step: 1
+    temps:
+      name: Durée avant alerte (en minutes)
+      default: 3
+      selector:
+        number:
+          min: 1
+          max: 30
+          unit_of_measurement: 'min'
+    notification_device:
+      name: Appareil de notification
+      selector:
+        device:
+          integration: mobile_app
+
+trigger:
+  - platform: numeric_state
+    entity_id: !input temperature_sensor
+    above: !input seuil_temperature
+    for:
+      minutes: !input temps
+
+action:
+  - device_id: !input notification_device
+    domain: mobile_app
+    type: notify
+    message: >-
+      🌡️ La température du NAS dépasse {{ seuil_temperature }} °C depuis {{ temps }} minutes.
+      Vérifie le système de refroidissement !
+
+mode: single
