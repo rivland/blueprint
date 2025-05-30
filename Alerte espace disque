@@ -1,0 +1,39 @@
+blueprint:
+  name: Alerte espace disque NAS Synology
+  description: Alerte lorsque l’espace utilisé sur un volume dépasse un certain pourcentage.
+  domain: automation
+  input:
+    volume_sensor:
+      name: Capteur d’utilisation du volume
+      selector:
+        entity:
+          domain: sensor
+    seuil_utilisation:
+      name: Seuil d’utilisation (%)
+      default: 90
+      selector:
+        number:
+          min: 50
+          max: 100
+          unit_of_measurement: '%'
+          step: 1
+    notification_device:
+      name: Appareil de notification
+      selector:
+        device:
+          integration: mobile_app
+
+trigger:
+  - platform: numeric_state
+    entity_id: !input volume_sensor
+    above: !input seuil_utilisation
+
+action:
+  - device_id: !input notification_device
+    domain: mobile_app
+    type: notify
+    message: >-
+      📦 Le volume du NAS a dépassé {{ seuil_utilisation }} % d’utilisation.
+      Pense à libérer de l’espace ou ajouter du stockage.
+
+mode: single
