@@ -1,0 +1,172 @@
+blueprint:
+  name: Surveillance avancée NAS Synology + UPS (APC)
+  description: |
+    Un seul blueprint pour surveiller plusieurs paramètres critiques :
+    - CPU, RAM, température, disque, volume, état UPS.
+    Envoie une notification si un seuil est dépassé ou un état critique détecté.
+  domain: automation
+  input:
+    cpu_sensor:
+      name: Capteur CPU
+      default: ""
+      selector:
+        entity:
+          domain: sensor
+    seuil_cpu:
+      name: Seuil CPU (%)
+      default: 85
+      selector:
+        number:
+          min: 10
+          max: 100
+          step: 1
+          unit_of_measurement: '%'
+
+    ram_sensor:
+      name: Capteur RAM
+      default: ""
+      selector:
+        entity:
+          domain: sensor
+    seuil_ram:
+      name: Seuil RAM (%)
+      default: 85
+      selector:
+        number:
+          min: 10
+          max: 100
+          step: 1
+          unit_of_measurement: '%'
+
+    temp_sensor:
+      name: Capteur température NAS
+      default: ""
+      selector:
+        entity:
+          domain: sensor
+    seuil_temp:
+      name: Température max (°C)
+      default: 60
+      selector:
+        number:
+          min: 30
+          max: 90
+          unit_of_measurement: '°C'
+          step: 1
+
+    volume_sensor:
+      name: Capteur d’utilisation du volume (%)
+      default: ""
+      selector:
+        entity:
+          domain: sensor
+    seuil_volume:
+      name: Seuil d’utilisation disque (%)
+      default: 90
+      selector:
+        number:
+          min: 50
+          max: 100
+          unit_of_measurement: '%'
+          step: 1
+
+    status_volume:
+      name: État du volume (normal / degraded / crashed)
+      default: ""
+      selector:
+        entity:
+          domain: sensor
+
+    ups_status:
+      name: Capteur d’état de l’UPS (NUT)
+      default: ""
+      selector:
+        entity:
+          domain: sensor
+
+    notification_device:
+      name: Appareil de notification
+      selector:
+        device:
+          integration: mobile_app
+
+mode: queued
+max: 10
+
+trigger:
+  - platform: numeric_state
+    entity_id: !input cpu_sensor
+    above: !input seuil_cpu
+    id: cpu
+  - platform: numeric_state
+    entity_id: !input ram_sensor
+    above: !input seuil_ram
+    id: ram
+  - platform: numeric_state
+    entity_id: !input temp_sensor
+    above: !input seuil_temp
+    id: temp
+  - platform: numeric_state
+    entity_id: !input volume_sensor
+    above: !input seuil_volume
+    id: volume
+  - platform: state
+    entity_id: !input status_volume
+    not_to: "normal"
+    id: degraded
+  - platform: state
+    entity_id: !input ups_status
+    to: "on battery"
+    id: ups
+
+action:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: cpu
+        sequence:
+          - device_id: !input notification_device
+            domain: mobile_app
+            type: notify
+            message: "🔥 Alerte CPU : dépasse {{ seuil_cpu }} % sur ton NAS."
+      - conditions:
+          - condition: trigger
+            id: ram
+        sequence:
+          - device_id: !input notification_device
+            domain: mobile_app
+            type: notify
+            message: "🧠 Alerte RAM : dépasse {{ seuil_ram }} % sur ton NAS."
+      - conditions:
+          - condition: trigger
+            id: temp
+        sequence:
+          - device_id: !input notification_device
+            domain: mobile_app
+            type: notify
+            message: "🌡️ Alerte température : dépasse {{ seuil_temp }} °C sur ton NAS."
+      - conditions:
+          - condition: trigger
+            id: volume
+        sequence:
+          - device_id: !input notification_device
+            domain: mobile_app
+            type: notify
+            message: "💾 Alerte disque : dépasse {{ seuil_volume }} % d’occupation sur le NAS."
+      - conditions:
+          - condition: trigger
+            id: degraded
+        sequence:
+          - device_id: !input notification_device
+            domain: mobile_app
+            type: notify
+            message: "⚠️ Le volume du NAS n’est pas en état normal !"
+      - conditions:
+          - condition: trigger
+            id: ups
+        sequence:
+          - device_id: !input notification_device
+            domain: mobile_app
+            type: notify
+            message: "🔋 Coupure secteur : le NAS fonctionne sur batterie (UPS)."
+
