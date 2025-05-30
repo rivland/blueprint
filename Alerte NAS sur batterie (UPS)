@@ -1,0 +1,30 @@
+blueprint:
+  name: Alerte NAS sur batterie (UPS)
+  description: Notification lorsque le NAS fonctionne sur batterie (coupure de courant).
+  domain: automation
+  input:
+    ups_status_sensor:
+      name: Capteur d’état UPS
+      selector:
+        entity:
+          domain: sensor
+    notification_device:
+      name: Appareil de notification
+      selector:
+        device:
+          integration: mobile_app
+
+trigger:
+  - platform: state
+    entity_id: !input ups_status_sensor
+    to: "on battery"
+
+action:
+  - device_id: !input notification_device
+    domain: mobile_app
+    type: notify
+    message: >-
+      🔋 Le NAS fonctionne sur batterie (UPS activé).
+      Il y a probablement une coupure de courant.
+
+mode: single
