@@ -1,0 +1,51 @@
+blueprint:
+  name: Alerte RAM NAS Synology
+  description: Envoie une notification si l'utilisation mémoire dépasse un seuil pendant un certain temps.
+  domain: automation
+  input:
+    ram_sensor:
+      name: Capteur RAM
+      selector:
+        entity:
+          domain: sensor
+    seuil_ram:
+      name: Seuil d’alerte RAM (%)
+      default: 85
+      selector:
+        number:
+          min: 10
+          max: 100
+          unit_of_measurement: '%'
+          step: 1
+          mode: slider
+    temps:
+      name: Durée avant alerte (en minutes)
+      default: 5
+      selector:
+        number:
+          min: 1
+          max: 60
+          step: 1
+          unit_of_measurement: 'min'
+    notification_device:
+      name: Appareil de notification (mobile ou autre)
+      selector:
+        device:
+          integration: mobile_app
+
+trigger:
+  - platform: numeric_state
+    entity_id: !input ram_sensor
+    above: !input seuil_ram
+    for:
+      minutes: !input temps
+
+action:
+  - device_id: !input notification_device
+    domain: mobile_app
+    type: notify
+    message: >-
+      ⚠️ Le NAS utilise plus de {{ seuil_ram }} % de mémoire depuis plus de {{ temps }} minutes.
+      Il pourrait être surchargé.
+
+mode: single
