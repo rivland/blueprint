@@ -1,0 +1,31 @@
+blueprint:
+  name: Alerte volume NAS dégradé
+  description: Envoie une notification si l’état d’un volume n’est pas "normal".
+  domain: automation
+  input:
+    volume_status_sensor:
+      name: État du volume NAS
+      selector:
+        entity:
+          domain: sensor
+    notification_device:
+      name: Appareil de notification
+      selector:
+        device:
+          integration: mobile_app
+
+trigger:
+  - platform: state
+    entity_id: !input volume_status_sensor
+    not_to: "normal"
+
+action:
+  - device_id: !input notification_device
+    domain: mobile_app
+    type: notify
+    message: >-
+      ⚠️ Le volume du NAS n’est plus en état "normal".
+      État actuel : {{ states(volume_status_sensor) }}.
+      Agis rapidement pour éviter une perte de données.
+
+mode: single
