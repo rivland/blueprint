@@ -1,0 +1,280 @@
+blueprint:
+  name: Notifications puissantesv2
+  description: |
+    Envoyez des notifications puissantes qui se désactivent d'elles-mêmes aux personnes du foyer en fonction de l'endroit où elles se trouvent.
+    Ce modèle doit être utilisé à chaque fois que vous souhaitez configurer une nouvelle notification.
+    Il créera un script que vous pourrez appeler à chaque fois que vous voudrez l'envoyer.
+  domain: script
+  author: JLo
+  input:
+    target:
+      name: Notification target
+      icon: mdi:bullseye-arrow
+      description: Contrôlez qui recevra la notification.
+      input:
+        persons:
+          name: Among these people ...
+          description: Laissez vide si vous ne souhaitez pas filtrer la liste initiale.
+          default: []
+          selector:
+            entity:
+              multiple: true
+              domain: person
+        target:
+          name: ... Envoyer la notification à
+          description: Cible de la notification.
+          default: send_to_all   # correction : "default" (et non "defaut")
+          selector:
+            select:
+              options:
+                - label: Tout le monde
+                  value: send_to_all
+                - label: Tout le monde à l'intérieur d'une (de) zone(s)
+                  value: send_to_persons_in_zones
+                - label: Tout le monde en dehors d'une (ou de plusieurs) zone(s)
+                  value: send_to_persons_not_in_zones
+                - label: Le plus proche d'un objet
+                  value: send_to_nearest
+
+        zones:
+          name: Zones (Facultatif)
+          description: Uniquement si cible est basée sur des zones.
+          default: []
+          selector:
+            entity:
+              multiple: true
+              domain: zone
+        thing:
+          name: Plus proche de... (Facultatif)
+          description: Uniquement utile si cible = send_to_nearest.
+          default: ""
+          selector:
+            entity:
+              domain:
+                - person
+                - device_tracker
+                - zone
+
+    content:
+      name: Contenu de la notification par défaut
+      icon: mdi:message
+      input:
+        default_title:
+          name: Titre par défaut
+          default: ""
+          selector:
+            text: {}
+        default_message:
+          name: Message par défaut
+          default: ""
+          selector:
+            text: {}
+        default_importance:
+          name: Importance par défaut
+          default: false
+          selector:
+            boolean: {}
+
+    button:
+      name: Bouton de notification
+      collapsed: true
+      icon: mdi:button-pointer
+      input:
+        button_title:
+          name: Titre du bouton
+          default: ""
+          selector:
+            text: {}
+        button_action:
+          name: Action du bouton
+          default: []
+          selector:
+            action: {}
+
+    discard:
+      name: Rejet de la notification
+      collapsed: true
+      icon: mdi:delete
+      input:
+        discard_when:
+          name: Jeter lorsque ...
+          default: []
+          selector:
+            trigger: {}
+
+    advanced_section:
+      name: Données de notification avancées
+      collapsed: true
+      icon: mdi:cog
+      input:
+        notification_data_advanced:
+          name: Données avancées
+          default: {}
+          selector:
+            object: {}
+
+variables:
+  person_service_mapping:
+    person.jenova70:
+      service: notify.mobile_app_jean_loics_iphone
+
+mode: restart
+max_exceeded: silent
+
+fields:
+  user_title:
+    name: Titre
+    required: false
+    selector:
+      text: {}
+  user_message:
+    name: Message
+    required: false
+    selector:
+      text: {}
+  user_importance:
+    name: Importance
+    required: false
+    selector:
+      boolean: {}
+  user_tag:
+    name: Identifiant unique
+    required: false
+    selector:
+      text: {}
+
+sequence:
+  - variables:
+      target: !input target
+      persons: !input persons
+      zones: !input zones
+      thing: !input thing
+      default_title: !input default_title
+      default_message: !input default_message
+      default_importance: !input default_importance
+      button_title: !input button_title
+      button_action: !input button_action
+      discard_when: !input discard_when
+      notification_data_advanced: !input notification_data_advanced
+      default_tag: "{{ this.entity_id | md5 }}"
+      title: >
+        {% if user_title != none and user_title != '' %}
+          {{ user_title }}
+        {% else %}
+          {{ default_title }}
+        {% endif %}
+      message: >
+        {% if user_message != none and user_message != '' %}
+          {{ user_message }}
+        {% else %}
+          {{ default_message }}
+        {% endif %}
+      importance: "{{ user_importance if user_importance is not none else default_importance }}"
+      tag: "{{ user_tag if user_tag is not none and user_tag != '' else default_tag }}"
+      notification_data_tag:
+        tag: "{{ tag }}"
+      notification_data_importance: >
+        {% if importance %}
+          {"push": {"interruption-level": "critical"}}
+        {% else %}
+          {}
+        {% endif %}
+      notification_data_callback: >
+        {% if button_title | length > 0 %}
+          {"actions":[{"action":"{{ tag }}","title":"{{ button_title }}","icon":"sfsymbols:checkmark.circle"}]}
+        {% else %}
+          {}
+        {% endif %}
+      notification_data: >
+        {{ dict(notification_data_tag, **(notification_data_importance | from_json), **(notification_data_callback | from_json), **notification_data_advanced) }}
+
+      initial_iterable_list: >
+        {{ persons if persons | length > 0 else expand(states.person) | map(attribute='entity_id') | list }}
+      iterable_persons: >
+        {% set ppl = namespace(list=[]) %}
+        {% if target == 'send_to_all' %}
+          {% set ppl.list = initial_iterable_list %}
+        {% elif target in ['send_to_persons_in_zones', 'send_to_persons_not_in_zones'] %}
+          {% for p in initial_iterable_list %}
+            {% set inside = false %}
+            {% for z in zones %}
+              {% if (distance(p, z) | float *1000) <= state_attr(z, 'radius') %}
+                {% set inside = true %}
+              {% endif %}
+            {% endfor %}
+            {% if (target == 'send_to_persons_in_zones' and inside) or (target == 'send_to_persons_not_in_zones' and not inside) %}
+              {% set ppl.list = ppl.list + [p] %}
+            {% endif %}
+          {% endfor %}
+        {% elif target == 'send_to_nearest' %}
+          {% set min_d = namespace(v=1e9) %}
+          {% for p in initial_iterable_list %}
+            {% set d = (distance(p, thing) | float *1000) %}
+            {% if d < min_d.v %}
+              {% set min_d.v = d %}
+            {% endif %}
+          {% endfor %}
+          {% for p in initial_iterable_list %}
+            {% set d = (distance(p, thing) | float *1000) %}
+            {% if d <= min_d.v %}
+              {% set ppl.list = ppl.list + [p] %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+        {{ ppl.list }}
+
+  - repeat:
+      for_each: "{{ iterable_persons }}"
+      sequence:
+        - if:
+            condition: template
+            value_template: >
+              {% set has_master = 'input_boolean.funny_notifications' in states %}
+              {% set has_agent = 'conversation.funny_notifications_conversation_agent' in states %}
+              {% set on = states('input_boolean.funny_notifications') == 'on' %}
+              {{ has_master and has_agent and on }}
+          then:
+            - conversation.process:
+                metadata: {}
+                data:
+                  agent_id: conversation.funny_notifications_conversation_agent
+                  text: '{"title":"{{ title }}","message":"{{ message }}"}'
+                response_variable: ai_output
+            - variables:
+                ai_output_json: "{{ ai_output.response.speech.plain.speech | from_json }}"
+            - service: "{{ person_service_mapping[repeat.item].service }}"
+              data:
+                title: "{{ ai_output_json.title }}"
+                message: "{{ ai_output_json.message }}"
+                data: "{{ notification_data }}"
+          else:
+            - service: "{{ person_service_mapping[repeat.item].service }}"
+              data:
+                title: "{{ title }}"
+                message: "{{ message }}"
+                data: "{{ notification_data }}"
+
+  - if:
+      condition: template
+      value_template: "{{ button_action | length > 0 or discard_when | length > 0 }}"
+    then:
+      - wait_for_trigger:
+          - event_type: mobile_app_notification_action
+            event_data:
+              action: "{{ tag }}"
+            id: button_pressed
+          - triggers: !input discard_when
+        continue_on_timeout: false
+      - if:
+          condition: template
+          value_template: "{{ wait.trigger.id == 'button_pressed' }}"
+        then:
+          - sequence: !input button_action
+      - repeat:
+          for_each: "{{ iterable_persons }}"
+          sequence:
+            - service: "{{ person_service_mapping[repeat.item].service }}"
+              data:
+                message: "clear_notification"
+                data:
+                  tag: "{{ tag }}"
