@@ -22,9 +22,9 @@ blueprint:
               filter:
                 - domain: person
         target:
-          name: ... Send the notification to
+          name: ... Envoyer la notification à
           description: Cible de la notification. Il peut s'agir d'une personne spécifique avec "Envoyer à personne(s)", ou d'une cible plus conviviale.
-          défaut : send_to_all
+          defaut : send_to_all
           selector:
             select:
               options:
@@ -39,7 +39,7 @@ blueprint:
 
         zones:
           name: Zones (Facultatif)
-          description: Only usefull if the Target of the notification was set to "Everyone inside (a) zone(s)" or "Everyone outside (a) zone(s)".
+          description: Uniquement utile si la cible de la notification est "Tout le monde à l'intérieur d'une (de) zone(s)" ou "Tout le monde en dehors d'une (de) zone(s)".
           default: []
           selector:
             entity:
