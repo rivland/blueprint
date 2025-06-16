@@ -1,5 +1,5 @@
 blueprint:
-  name: Notifications puissantes by jlpouffier
+  name: Notifications puissantes
   description: |
     Envoyez des notifications puissantes qui se désactivent d'elles-mêmes aux personnes du foyer en fonction de l'endroit où elles se trouvent.
     Ce modèle doit être utilisé à chaque fois que vous souhaitez configurer une nouvelle notification.
@@ -24,7 +24,7 @@ blueprint:
         target:
           name: ... Envoyer la notification à
           description: Cible de la notification. Il peut s'agir d'une personne spécifique avec "Envoyer à personne(s)", ou d'une cible plus conviviale.
-          defaut : send_to_all
+          default: send_to_all 
           selector:
             select:
               options:
