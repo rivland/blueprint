@@ -13,7 +13,7 @@ blueprint:
       description: Contrôlez qui recevra la notification.
       input:
         persons:
-          name: Among these people ...
+          name: Parmi ces personnes ...
           description: Laissez vide si vous ne souhaitez pas filtrer la liste initiale.
           default: []
           selector:
