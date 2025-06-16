@@ -29,11 +29,11 @@ blueprint:
               options:
                 - label: Tout le monde
                   value: send_to_all
-                - label: Tout le monde à l'intérieur d'une (de) zone(s)
+                - label: Tout le monde à l'intérieur d'une (ou de plusieurs) zone(s)
                   value: send_to_persons_in_zones
                 - label: Tout le monde en dehors d'une (ou de plusieurs) zone(s)
                   value: send_to_persons_not_in_zones
-                - label: Le plus proche d'un objet
+                - label: La plus proche d'une (ou de plusieurs) zone(s)
                   value: send_to_nearest
 
         zones:
@@ -46,7 +46,7 @@ blueprint:
               domain: zone
         thing:
           name: Plus proche de... (Facultatif)
-          description: Uniquement utile si cible = send_to_nearest.
+          description: Uniquement utile si cible = Envoyer au plus proche.
           default: ""
           selector:
             entity:
